@@ -254,8 +254,8 @@ const AgendaMeetings = (props, { intl }) => {
           history.goBack();
           return res;
         })
-        // attention à l'utilisation des .catch, ils ne font pas que gérer les erreurs des promesses, 
-        // il se déclenche aussi s'il y a une erreur dans le then, pour gérés les erreurs de ajax, 
+        // attention à l'utilisation des .catch, ils ne font pas que gérer les erreurs des promesses,
+        // il se déclenche aussi s'il y a une erreur dans le then, pour gérés les erreurs de ajax,
         // il vaut mieux utiliser le deuxième paramètre de la méthode then
         .catch((err) => {
           setSnackBarText("Une erreur est survenue");
@@ -813,7 +813,8 @@ const AgendaMeetings = (props, { intl }) => {
                 </Grid>
               </Grid>
             </Grid>
-            {/* Il serait judicieux de sortir la partie admin dans un sous composant, en utilisant Un React.Lazy, pour ne le charger que dans les cas où il est réellement utile. */}
+            {/* Il serait judicieux de sortir la partie admin dans un sous composant, en utilisant Un React.Lazy,
+            // pour ne le charger que dans les cas où il est réellement utile. */}
             {isAdminMod && (
               <>
                 <Grid container spacing={0} xs={12}>
