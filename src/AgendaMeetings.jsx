@@ -10,7 +10,7 @@ import {
   useUpdate2,
 } from "meteor/vulcan:core";
 import Grid from "@mui/material/Grid";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete from "./components/autocomplete";
 import Paper from "@mui/material/Paper";
 import { FormattedMessage, intlShape } from "meteor/vulcan:i18n";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -214,8 +214,8 @@ const AgendaMeetings = (props, { intl }) => {
   }, [watch]);
 
   /* La méthode est trop complexe, beaucoup trop de if imbriqué, il serait bon de splitter un peu en plusieurs fonction ayant chacun sa responsabilité.
-    De plus, les retours de création et de sauvegarde sont quasiment identique sauf la partie history. Il y a moyen de factoriser.
-  */
+      De plus, les retours de création et de sauvegarde sont quasiment identique sauf la partie history. Il y a moyen de factoriser.
+    */
   const onSubmitForms = async () => {
     const values = getValues();
 
@@ -313,9 +313,6 @@ const AgendaMeetings = (props, { intl }) => {
       label: `${people?.firstName} ${people?.lastName}`,
       value: people?.userId,
     })) || [];
-
-  const findDefaultValue = (arrayList, value) =>
-    arrayList?.filter((arrayItem) => value?.includes(arrayItem?.value));
 
   return (
     <Root $primaryColor={primaryColor}>
@@ -434,36 +431,17 @@ const AgendaMeetings = (props, { intl }) => {
                     fieldState: { error },
                   }) => {
                     return (
-                      <>
-                        <Autocomplete
-                          value={value ?? ""}
-                          inputRef={ref}
-                          options={meetingTypesPicklist.map(
-                            (item) => item.value
-                          )}
-                          filterSelectedOptions
-                          getOptionLabel={(value) =>
-                            meetingTypesPicklist.find(
-                              (meetingType) => meetingType.value === value
-                            )?.label ?? ""
-                          }
-                          renderInput={(params) => (
-                            <TextField
-                              variant="standard"
-                              {...params}
-                              label={intl.formatMessage({
-                                id: "meeting.eventType",
-                              })}
-                              helperText=" "
-                            />
-                          )}
-                          size="small"
-                          onChange={(event, value) => onChange(value)}
-                        />
-                        <FormHelperText error>
-                          {error && error.message}
-                        </FormHelperText>
-                      </>
+                      <Autocomplete
+                        intl={intl}
+                        value={value ?? ""}
+                        values={meetingTypesPicklist.map((item) => item.value)}
+                        ref={ref}
+                        labelId="meeting.eventType"
+                        helperText="Meeting type"
+                        size="small"
+                        onChange={(event, value) => onChange(value)}
+                        error={error}
+                      />
                     );
                   }}
                 />
@@ -528,42 +506,19 @@ const AgendaMeetings = (props, { intl }) => {
                     render={({
                       field: { onChange, value, ref },
                       fieldState: { error },
-                    }) => {
-                      return (
-                        <>
-                          <Autocomplete
-                            inputRef={ref}
-                            value={findDefaultValue(peoplesFormatted, value)}
-                            onChange={(event, speakersId) =>
-                              onChange(speakersId?.map((it) => it?.value))
-                            }
-                            multiple
-                            options={peoplesFormatted}
-                            disableCloseOnSelect
-                            filterSelectedOptions
-                            getOptionLabel={(option) =>
-                              peoplesFormatted?.find(
-                                (it) => it?.value === option?.value
-                              )?.label ?? ""
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                variant="standard"
-                                {...params}
-                                label={intl.formatMessage({
-                                  id: "meeting.speakerList",
-                                })}
-                                helperText=" "
-                              />
-                            )}
-                            size="small"
-                          />
-                          <FormHelperText error>
-                            {error && error.message}
-                          </FormHelperText>
-                        </>
-                      );
-                    }}
+                    }) => (
+                      <Autocomplete
+                        intl={intl}
+                        value={value ?? ""}
+                        values={peoplesFormatted}
+                        ref={ref}
+                        labelId="meeting.speakerList"
+                        helperText="Meeting speakers"
+                        size="small"
+                        onChange={(event, value) => onChange(value)}
+                        error={error}
+                      />
+                    )}
                   />
                 </Grid>
               </Grid>
@@ -863,33 +818,14 @@ const AgendaMeetings = (props, { intl }) => {
                           name={"participantsIdList"}
                           render={({ field: { onChange, value, ref } }) => (
                             <Autocomplete
-                              inputRef={ref}
-                              value={findDefaultValue(peoplesFormatted, value)}
-                              onChange={(event, participantsIdList) =>
-                                onChange(
-                                  participantsIdList?.map((it) => it?.value)
-                                )
-                              }
-                              multiple
-                              options={peoplesFormatted}
-                              disableCloseOnSelect
-                              filterSelectedOptions
-                              getOptionLabel={(option) =>
-                                peoplesFormatted?.find(
-                                  (it) => it?.value === option?.value
-                                )?.label ?? ""
-                              }
-                              renderInput={(params) => (
-                                <TextField
-                                  variant="standard"
-                                  {...params}
-                                  helperText="Par défaut, tous les participant.e.s y auront accès. Sélectionnez une ou plusieurs personnes pour les inscrire"
-                                  label={intl.formatMessage({
-                                    id: "meeting.participantAccessEvent",
-                                  })}
-                                />
-                              )}
+                              intl={intl}
+                              value={value ?? ""}
+                              values={peoplesFormatted}
+                              ref={ref}
+                              labelId="meeting.participantAccessEvent"
+                              helperText="Par défaut, tous les participant.e.s y auront accès. Sélectionnez une ou plusieurs personnes pour les inscrire"
                               size="small"
+                              onChange={(event, value) => onChange(value)}
                             />
                           )}
                         />
@@ -913,31 +849,14 @@ const AgendaMeetings = (props, { intl }) => {
                         name={"promotions"}
                         render={({ field: { onChange, value, ref } }) => (
                           <Autocomplete
-                            inputRef={ref}
-                            value={findDefaultValue(promotions, value)}
-                            onChange={(event, item) =>
-                              onChange(item?.map((it) => it?.value))
-                            }
-                            multiple
-                            options={promotions}
-                            disableCloseOnSelect
-                            filterSelectedOptions
-                            getOptionLabel={(option) =>
-                              promotions?.find(
-                                (it) => it?.value === option?.value
-                              )?.label ?? ""
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                variant="standard"
-                                {...params}
-                                label={intl.formatMessage({
-                                  id: "meeting.promotionAccessEvent",
-                                })}
-                                helperText="Par défaut, toutes les promotions auront accès à l’événement. Pour restreindre l’accès, choisissez les promotions souhaitées"
-                              />
-                            )}
+                            intl={intl}
+                            value={value ?? ""}
+                            values={promotions}
+                            ref={ref}
+                            labelId="meeting.promotionAccessEvent"
+                            helperText="Par défaut, toutes les promotions auront accès à l’événement. Pour restreindre l’accès, choisissez les promotions souhaitées"
                             size="small"
+                            onChange={(event, value) => onChange(value)}
                           />
                         )}
                       />
@@ -953,36 +872,17 @@ const AgendaMeetings = (props, { intl }) => {
                         name={"personaLabel"}
                         render={({ field: { onChange, value, ref } }) => (
                           <Autocomplete
-                            inputRef={ref}
-                            value={findDefaultValue(_personaLabelData, value)}
-                            onChange={(event, item) =>
-                              onChange(item?.map((it) => it?.value))
-                            }
-                            multiple
-                            disableCloseOnSelect
-                            filterSelectedOptions
-                            options={_personaLabelData?.map((it) => ({
+                            intl={intl}
+                            value={value ?? ""}
+                            values={_personaLabelData?.map((it) => ({
                               label: it?.label,
                               value: it?.value,
                             }))}
-                            getOptionLabel={(option) =>
-                              _personaLabelData.find(
-                                (it) => it?.value === option?.value
-                              )?.label ?? ""
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                variant="standard"
-                                {...params}
-                                label={intl.formatMessage({
-                                  id: "meeting.roleAccessEvent",
-                                })}
-                                helperText="Par défaut, tous les rôles y auront accès.
-                          Sélectionnez une ou plusieurs promotions pour
-                          restreindre l’accès."
-                              />
-                            )}
+                            ref={ref}
+                            labelId="meeting.roleAccessEvent"
+                            helperText="Par défaut, tous les rôles y auront accès. électionnez une ou plusieurs promotions pour restreindre l’accès."
                             size="small"
+                            onChange={(event, value) => onChange(value)}
                           />
                         )}
                       />
