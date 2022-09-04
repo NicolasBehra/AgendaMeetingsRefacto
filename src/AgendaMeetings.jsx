@@ -9,7 +9,6 @@ import {
   useUpdate2,
 } from "meteor/vulcan:core";
 import Grid from "@mui/material/Grid";
-import Autocomplete from "./components/autocomplete";
 import Paper from "@mui/material/Paper";
 import { FormattedMessage, intlShape } from "meteor/vulcan:i18n";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -26,10 +25,6 @@ import LineStyleIcon from "@mui/icons-material/LineStyle";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import LinkIcon from "@mui/icons-material/Link";
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import SpeakerGroupIcon from "@mui/icons-material/SpeakerGroup";
-import EngineeringIcon from "@mui/icons-material/Engineering";
-import GroupWorkIcon from "@mui/icons-material/GroupWork";
 
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import DateTimePicker from "@mui/lab/DateTimePicker";
@@ -59,12 +54,14 @@ import ControllerMeetingType from "./components/controllers/controller-meeting-t
 import ControllerTitle from "./components/controllers/controller-title";
 import ControllerSpeakerIdList from "./components/controllers/controller-speaker-id-list";
 import ControllerDetails from "./components/controllers/controller-details";
+import AdminGrid from "./components/admin-grid";
 
 const Container = styledRaw.div`
   width: 100%;
   padding: 30px;
   white-space: pre-line;
 `;
+// maybe put this code in a css file?
 const Root = styledRaw.div`
   width: 100%;
   display: flex;
@@ -198,6 +195,7 @@ const AgendaMeetings = (props, { intl }) => {
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
+      // Use Enum or name =
       if (name === "pillar") {
         setPillar(value?.pillar);
       }
@@ -619,125 +617,14 @@ const AgendaMeetings = (props, { intl }) => {
             {/* Il serait judicieux de sortir la partie admin dans un sous composant, en utilisant Un React.Lazy,
             // pour ne le charger que dans les cas où il est réellement utile. */}
             {isAdminMod && (
-              <>
-                <Grid container spacing={0} xs={12}>
-                  <Grid spacing={0} md={6} container direction="row">
-                    <Grid item>
-                      <PeopleAltIcon className="SvgIcon-filled" />
-                    </Grid>
-                    <Grid item xs sx={{ mr: "20px" }}>
-                      <Controller
-                        control={control}
-                        name={"maxParticipants"}
-                        rules={{
-                          valueAsNumber: true,
-                        }}
-                        render={({ field: { onChange, value, ref } }) => (
-                          <TextField
-                            inputRef={ref}
-                            onChange={(event) =>
-                              onChange(Number(event.target.value))
-                            }
-                            value={value}
-                            fullWidth
-                            id="maxParticipants"
-                            label={intl.formatMessage({
-                              id: "meeting.numberParticipantAccessEvent",
-                            })}
-                            InputProps={{ inputProps: { min: 1, max: 10_000 } }}
-                            type="number"
-                            color="primary"
-                            variant="standard"
-                            className="maxParticipants"
-                            helperText=" "
-                          />
-                        )}
-                      />
-                    </Grid>
-                  </Grid>
-                  <Grid spacing={0} md={6} container direction="row">
-                    <Grid item>
-                      <SpeakerGroupIcon className="SvgIcon-filled" />
-                    </Grid>
-                    <Grid item xs>
-                      {!loadingPeoples && peoples && (
-                        <Controller
-                          control={control}
-                          name={"participantsIdList"}
-                          render={({ field: { onChange, value, ref } }) => (
-                            <Autocomplete
-                              intl={intl}
-                              value={value ?? ""}
-                              values={peoplesFormatted}
-                              ref={ref}
-                              labelId="meeting.participantAccessEvent"
-                              helperText="Par défaut, tous les participant.e.s y auront accès. Sélectionnez une ou plusieurs personnes pour les inscrire"
-                              size="small"
-                              onChange={(event, value) => onChange(value)}
-                            />
-                          )}
-                        />
-                      )}
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid container spacing={0} xs={12}>
-                  <Grid spacing={0} md={6} container direction="row">
-                    <Grid item>
-                      <EngineeringIcon className="SvgIcon-filled" />
-                    </Grid>
-                    <Grid
-                      item
-                      xs
-                      sx={{ mr: "20px" }}
-                      className="promotionAccess"
-                    >
-                      <Controller
-                        control={control}
-                        name={"promotions"}
-                        render={({ field: { onChange, value, ref } }) => (
-                          <Autocomplete
-                            intl={intl}
-                            value={value ?? ""}
-                            values={promotions}
-                            ref={ref}
-                            labelId="meeting.promotionAccessEvent"
-                            helperText="Par défaut, toutes les promotions auront accès à l’événement. Pour restreindre l’accès, choisissez les promotions souhaitées"
-                            size="small"
-                            onChange={(event, value) => onChange(value)}
-                          />
-                        )}
-                      />
-                    </Grid>
-                  </Grid>
-                  <Grid spacing={0} md={6} container direction="row">
-                    <Grid item>
-                      <GroupWorkIcon className="SvgIcon-filled" />
-                    </Grid>
-                    <Grid item xs>
-                      <Controller
-                        control={control}
-                        name={"personaLabel"}
-                        render={({ field: { onChange, value, ref } }) => (
-                          <Autocomplete
-                            intl={intl}
-                            value={value ?? ""}
-                            values={_personaLabelData?.map((it) => ({
-                              label: it?.label,
-                              value: it?.value,
-                            }))}
-                            ref={ref}
-                            labelId="meeting.roleAccessEvent"
-                            helperText="Par défaut, tous les rôles y auront accès. électionnez une ou plusieurs promotions pour restreindre l’accès."
-                            size="small"
-                            onChange={(event, value) => onChange(value)}
-                          />
-                        )}
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </>
+              <AdminGrid
+                intl={intl}
+                peoples={peoples}
+                peoplesFormatted={peoplesFormatted}
+                loadingPeoples={loadingPeoples}
+                promotions={promotions}
+                _personaLabelData={_personaLabelData}
+              />
             )}
             <Grid container justifyContent="flex-start">
               <Button
