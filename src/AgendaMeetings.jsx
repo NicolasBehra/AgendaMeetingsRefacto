@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import styledRaw from "@emotion/styled";
 import { Controller, useForm } from "react-hook-form";
 import {
-  Components,
   useCreate2,
   useCurrentUser,
   useMulti2,
@@ -45,10 +44,6 @@ import {
   personaLabelData,
   regex,
 } from "meteor/lfg-lib";
-import {
-  CustomSelect,
-  ObjectiveTemplatePillarConditionalInput,
-} from "meteor/lfg-roadmap";
 import { useCustomPicklist } from "meteor/lfg-picklist";
 import { meetingTypes } from "../../../modules/meetings/meetingSchema";
 import { yearsArray } from "meteor/lfg-people";
@@ -58,6 +53,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import IconButton from "@mui/material/IconButton";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import ControllerPillar from "./components/controllers/controller-pillar";
+import ControllerObjectiveTemplateSlug from "./components/controllers/controller-objective-template-slug";
+import ControllerMeetingType from "./components/controllers/controller-meeting-type";
+import ControllerTitle from "./components/controllers/controller-title";
+import ControllerSpeakerIdList from "./components/controllers/controller-speaker-id-list";
+import ControllerDetails from "./components/controllers/controller-details";
 
 const Container = styledRaw.div`
   width: 100%;
@@ -348,66 +349,17 @@ const AgendaMeetings = (props, { intl }) => {
             </Grid>
             <Grid container spacing={2}>
               <Grid item xs={6} md={2}>
-                <Controller
+                <ControllerPillar
                   control={control}
-                  name={"pillar"}
-                  rules={{
-                    required: {
-                      value: true,
-                      message: "Le pilier est requis",
-                    },
-                  }}
-                  render={({
-                    field: { onChange, value, ref },
-                    fieldState: { error },
-                  }) => (
-                    <>
-                      <CustomSelect
-                        inputRef={ref}
-                        name="pillar"
-                        label="Piliers"
-                        document={{ pillar: value }}
-                        updateCurrentValues={({ pillar }) => onChange(pillar)}
-                        options={_pillarsData.map((it) => ({
-                          label: it.label,
-                          value: it.value,
-                        }))}
-                      />
-                      <FormHelperText error>
-                        {error && error.message}
-                      </FormHelperText>
-                    </>
-                  )}
+                  _pillarsData={_pillarsData}
                 />
               </Grid>
               <Grid item xs={6} md={3}>
                 {pillar && (
-                  <Controller
+                  <ControllerObjectiveTemplateSlug
                     control={control}
-                    name={"objectiveTemplateSlug"}
-                    render={({
-                      field: { onChange, value, ref },
-                      fieldState: { error },
-                    }) => (
-                      <>
-                        <ObjectiveTemplatePillarConditionalInput
-                          inputRef={ref}
-                          name="objectiveTemplateSlug"
-                          document={{ pillar, objectiveTemplateSlug: value }}
-                          label="Objectifs"
-                          updateCurrentValues={({ objectiveTemplateSlug }) =>
-                            onChange(objectiveTemplateSlug)
-                          }
-                          options={_pillarsData.map((it) => ({
-                            label: it?.label,
-                            value: it?.value,
-                          }))}
-                        />
-                        <FormHelperText error>
-                          {error && error.message}
-                        </FormHelperText>
-                      </>
-                    )}
+                    _pillarsData={_pillarsData}
+                    pillar={pillar}
                   />
                 )}
               </Grid>
@@ -417,33 +369,10 @@ const AgendaMeetings = (props, { intl }) => {
                 <PausePresentationIcon className="SvgIcon-filled" />
               </Grid>
               <Grid item xs>
-                <Controller
+                <ControllerMeetingType
                   control={control}
-                  name={"meetingType"}
-                  rules={{
-                    required: {
-                      value: true,
-                      message: "Le type d'événement est requis",
-                    },
-                  }}
-                  render={({
-                    field: { onChange, value, ref },
-                    fieldState: { error },
-                  }) => {
-                    return (
-                      <Autocomplete
-                        intl={intl}
-                        value={value ?? ""}
-                        values={meetingTypesPicklist.map((item) => item.value)}
-                        ref={ref}
-                        labelId="meeting.eventType"
-                        helperText="Meeting type"
-                        size="small"
-                        onChange={(event, value) => onChange(value)}
-                        error={error}
-                      />
-                    );
-                  }}
+                  intl={intl}
+                  meetingTypesPicklist={meetingTypesPicklist}
                 />
               </Grid>
             </Grid>
@@ -453,40 +382,7 @@ const AgendaMeetings = (props, { intl }) => {
                   <Edit className="SvgIcon-filled" />
                 </Grid>
                 <Grid item xs sx={{ mr: "20px" }}>
-                  <Controller
-                    control={control}
-                    name={"title"}
-                    rules={{
-                      required: {
-                        value: true,
-                        message: "Le titre est requis",
-                      },
-                    }}
-                    render={({
-                      field: { onChange, value, ref },
-                      fieldState: { error },
-                    }) => (
-                      <>
-                        <TextField
-                          inputRef={ref}
-                          value={value || ""}
-                          onChange={(e) => onChange(e.target.value)}
-                          fullWidth
-                          name="title"
-                          id="title"
-                          color="primary"
-                          variant="standard"
-                          label={intl.formatMessage({
-                            id: "meeting.titleEvent",
-                          })}
-                          helperText=" "
-                        />
-                        <FormHelperText error>
-                          {error && error.message}
-                        </FormHelperText>
-                      </>
-                    )}
-                  />
+                  <ControllerTitle control={control} intl={intl} />
                 </Grid>
               </Grid>
               <Grid spacing={0} md={6} container direction="row">
@@ -494,31 +390,10 @@ const AgendaMeetings = (props, { intl }) => {
                   <CampaignIcon className="SvgIcon-filled" />
                 </Grid>
                 <Grid item xs>
-                  <Controller
+                  <ControllerSpeakerIdList
                     control={control}
-                    name={"speakersIdList"}
-                    rules={{
-                      required: {
-                        value: true,
-                        message: "Intervenant.e.s est requis.e.s",
-                      },
-                    }}
-                    render={({
-                      field: { onChange, value, ref },
-                      fieldState: { error },
-                    }) => (
-                      <Autocomplete
-                        intl={intl}
-                        value={value ?? ""}
-                        values={peoplesFormatted}
-                        ref={ref}
-                        labelId="meeting.speakerList"
-                        helperText="Meeting speakers"
-                        size="small"
-                        onChange={(event, value) => onChange(value)}
-                        error={error}
-                      />
-                    )}
+                    intl={intl}
+                    peoplesFormatted={peoplesFormatted}
                   />
                 </Grid>
               </Grid>
@@ -527,34 +402,7 @@ const AgendaMeetings = (props, { intl }) => {
                   <LineStyleIcon className="SvgIcon-filled" />
                 </Grid>
                 <Grid item xs>
-                  <Controller
-                    control={control}
-                    name={"details"}
-                    render={({
-                      field: { onChange, value, ref },
-                      fieldState: { error },
-                    }) => (
-                      <>
-                        <TextField
-                          inputRef={ref}
-                          fullWidth
-                          multiline
-                          id="details"
-                          value={value}
-                          onChange={(e) => onChange(e.target.value)}
-                          color="primary"
-                          variant="standard"
-                          label={intl.formatMessage({
-                            id: "meeting.describeEvent",
-                          })}
-                          helperText=" "
-                        />
-                        <FormHelperText error>
-                          {error && error.message}
-                        </FormHelperText>
-                      </>
-                    )}
-                  />
+                  <ControllerDetails control={control} intl={intl} />
                 </Grid>
               </Grid>
               <LocalizationProvider
